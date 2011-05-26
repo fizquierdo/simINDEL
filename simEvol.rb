@@ -2,7 +2,7 @@
 require 'fileutils'
 class IndelibleControlFile
   def initialize(filename, ntaxa, nbases)
-    insert_rate = 0.01
+    insert_rate = 0.001
     controlfile = <<END_OF_CONTROLFILE
     [TYPE] NUCLEOTIDE 1 //  nucleotide simulation using algorithm from method 1
 
@@ -42,7 +42,7 @@ wdir = "out/#{dirname}"
 FileUtils.mkdir_p(wdir)
 controlfile = IndelibleControlFile.new("#{wdir}/control.txt", ntaxa, nbases)
 Dir.chdir(wdir) do
-  system("#{INDELIBLE} #{controlfile}")
+  #system("#{INDELIBLE} #{controlfile}")
 end
 puts "DONE, alignment TRUE.phy in #{wdir}" 
 
