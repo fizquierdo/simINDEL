@@ -2,6 +2,7 @@
 require 'fileutils'
 class IndelibleControlFile
   def initialize(filename, ntaxa, nbases)
+    insert_rate = 0.01
     controlfile = <<END_OF_CONTROLFILE
     [TYPE] NUCLEOTIDE 1 //  nucleotide simulation using algorithm from method 1
 
@@ -9,8 +10,8 @@ class IndelibleControlFile
       [submodel]  GTR 0.2 0.4 0.6 0.8 1.2 //  GTR: a=0.2, b=0.4, c=0.6, d=0.8, e=1.2, f=1
       [statefreq] 0.20 0.25 0.25 0.30         //  pi_T, pi_C, pi_A, pi_G
       [indelmodel]  NB 0.5 1
-      [insertrate]  0.1
-      [deleterate]  0.1
+      [insertrate]  #{insert_rate} 
+      [deleterate]  #{insert_rate} 
 
     [TREE] random_tree
       [unrooted] #{ntaxa} 2.4 1.1 0.2566 0.34  // ntaxa birth death sample mut
