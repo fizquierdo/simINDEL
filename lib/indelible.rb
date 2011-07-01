@@ -41,15 +41,36 @@ def get_value(line)
   line.split(":")[1].chomp.strip.to_s
 end
 
+class Tree
+  attr_reader :name
+  attr_accessor :newick_str
+  def initialize(ntaxa)
+    @ntaxa = ntaxa
+    @name = "my_tree"
+    @newick_str = ""
+  end
+  def to_s
+    ret = String.new 
+    if @newick_str.empty?
+      ret << "[TREE] #{@name}" + "\n"
+      ret << "  [unrooted] #{@ntaxa} 2.4 1.1 0.2566 0.34  // ntaxa birth death sample mut" + "\n"
+      ret << "  [seed] 23575485" + "\n"
+    else
+      ret << "[TREE] #{@name}" + "\n"
+      ret << "#{@newick_str}\n"
+    end
+  end
+end
+
 class IndelibleControlFile
-  attr_accessor :model, :indelmodel
+  attr_accessor :model, :indelmodel, :tree
   def initialize(filename, ntaxa, nbases)
     @filename = filename
     @model = Model.new
+    @tree = Tree.new(ntaxa)
     @indelmodel = {}
     @ntaxa = ntaxa
     @nbases = nbases
-    @treename = "randomtree"
     @partitionname = "simulatedgene"
   end
   def load_modelfile(modelfile)
@@ -88,15 +109,13 @@ class IndelibleControlFile
       f.puts "  [insertrate] #{@indelmodel[:rate]}"
       f.puts "  [deleterate] #{@indelmodel[:rate]}"
       #tree (could be a newick or parameters to simulate tree with a particular shape)
-      f.puts "[TREE] #{@treename}"
-      f.puts "  [unrooted] #{@ntaxa} 2.4 1.1 0.2566 0.34  // ntaxa birth death sample mut"
-      f.puts "  [seed] 23575485"
+      f.puts @tree.to_s
       #partitions
       f.puts "[PARTITIONS] #{@partitionname}"
-      f.puts "  [#{@treename} #{@model.label} #{@nbases}]" 
+      f.puts "  [#{@tree.name} #{@model.label} #{@nbases}]" 
       #evolve
       f.puts "[EVOLVE]  #{@partitionname} 1 simulatedalignment" 
-      end
     end
   end
+end
 
