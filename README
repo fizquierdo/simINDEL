@@ -1,2 +1,13 @@
 By Fernando Izquierdo May 2011, fer.izquierdo@gmail.com
 scripts to run indelible
+
+- To generate an outinfoGTR file (need this only once)
+  1. Generate a guide tree from the alignment (tree_guideCAT)
+  2. Optimize and estimate the model parameters 
+  bin/raxmlHPC-SSE3 -m GTRGAMMA -f e -s 2308 -p 1111 -n guideGTR -t tree_guideCAT
+
+- To make an estimation of indel parameters:
+  scripts/phylip2fasta.rb 2308 > 2308.fas
+  perl -w scripts/lambda.pl example_data/RAxML_bestTree.guideCAT_5 example_data/2308.fas > indelmodel_estimate
+
+
