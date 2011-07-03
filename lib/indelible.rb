@@ -2,6 +2,10 @@
 # Indelible stuff
 INDELIBLE = "/home/izquiefo/software/indelible/INDELibleV1.03/src/indelible" 
 
+# default values birth-death process
+BDPARAMS = {:birth => 2.4, :death => 1.1, :sample => 0.25, :mut => 0.34} 
+
+
 class Model
   attr_accessor :statefreq, :rates, :label
   attr_reader :name, :parameters
@@ -43,18 +47,27 @@ end
 
 class Tree
   attr_reader :name
-  attr_accessor :newick_str
+  attr_accessor :newick_str, :birth, :death, :sample, :mut
   def initialize(ntaxa)
     @ntaxa = ntaxa
     @name = "my_tree"
     @newick_str = ""
+    # birth - death parameters
+    @birth = BDPARAMS[:birth]
+    @death = BDPARAMS[:death]
+    @sample = BDPARAMS[:sample]
+    @mut = BDPARAMS[:mut]
+    @seed = 43242342
+  end
+  def birth_death_params
+    @birth.to_s + " " + @death.to_s + " " + @sample.to_s + " " + @mut.to_s
   end
   def to_s
     ret = String.new 
     if @newick_str.empty?
       ret << "[TREE] #{@name}" + "\n"
-      ret << "  [unrooted] #{@ntaxa} 2.4 1.1 0.2566 0.34  // ntaxa birth death sample mut" + "\n"
-      ret << "  [seed] 23575485" + "\n"
+      ret << "  [unrooted] #{@ntaxa} #{birth_death_params}  // ntaxa birth death sample mut" + "\n"
+      ret << "  [seed] #{@seed}" + "\n"
     else
       ret << "[TREE] #{@name}" + "\n"
       ret << "#{@newick_str}\n"
