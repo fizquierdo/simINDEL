@@ -4,6 +4,11 @@ INDELIBLE = "/home/izquiefo/software/indelible/INDELibleV1.03/src/indelible"
 
 # default values birth-death process
 BDPARAMS = {:birth => 2.4, :death => 1.1, :sample => 0.25, :mut => 0.34} 
+BDKEYS = %w(birth death sample mut)
+
+# default values for indel model 
+INDEL_MODEL_PARAMS = {:param => 1.5, :trunc => 5, :rate => 0.01}
+IMKEYS = %w(param trunc rate)
 
 
 class Model
@@ -62,16 +67,38 @@ class Tree
   def birth_death_params
     @birth.to_s + " " + @death.to_s + " " + @sample.to_s + " " + @mut.to_s
   end
+  def load_birth_death_params(params)
+    raise "birth_death must be [#{BDKEYS.join(",")}]" unless params.split(",").size == 4
+    @birth, @death, @sample, @mut = params.split(',')
+  end
   def to_s
     ret = String.new 
     if @newick_str.empty?
-      ret << "[TREE] #{@name}" + "\n"
-      ret << "  [unrooted] #{@ntaxa} #{birth_death_params}  // ntaxa birth death sample mut" + "\n"
-      ret << "  [seed] #{@seed}" + "\n"
+      ret << "[TREE] #{@name}\n"
+      ret << "  [unrooted] #{@ntaxa} #{birth_death_params} \n"
+      ret << "  [seed] #{@seed}\n"
     else
-      ret << "[TREE] #{@name}" + "\n"
+      ret << "[TREE] #{@name}\n"
       ret << "#{@newick_str}\n"
     end
+  end
+end
+
+class IndelModel
+  def initialize()
+    @param = INDEL_MODEL_PARAMS[:param] 
+    @truc = INDEL_MODEL_PARAMS[:truc] 
+    @rate = INDEL_MODEL_PARAMS[:rate] 
+  end
+  def load_indel_params(params)
+    raise "INDEL info must be [#{IMKEYS.join ','}]" unless params.split(',').size == 3
+    @param, @truc, @rate = params.split(',')
+  end
+  def to_s
+    ret = "" 
+    ret << "  [indelmodel] POW #{@param} #{@truncate}\n"
+    ret << "  [insertrate] #{@rate}\n"
+    ret << "  [deleterate] #{@rate}\n"
   end
 end
 
@@ -81,7 +108,7 @@ class IndelibleControlFile
     @filename = filename
     @model = Model.new
     @tree = Tree.new(ntaxa)
-    @indelmodel = {}
+    @indelmodel = IndelModel.new 
     @ntaxa = ntaxa
     @nbases = nbases
     @partitionname = "simulatedgene"
@@ -106,27 +133,23 @@ class IndelibleControlFile
     end
     @model.load_GTR(p[:ct], p[:at] , p[:gt] , p[:ac] , p[:cg], p[:ag])
   end
-  def load_indelparams(indel_params)
-    @indelmodel[:param] = indel_params[0]
-    @indelmodel[:truncate] = indel_params[1]
-    @indelmodel[:rate] = indel_params[2]
+  def load_indel_params(params)
+    @indelmodel.load_indel_params(params)
+  end
+  def load_birth_death_params(params)
+    @tree.load_birth_death_params(params)
+  end
+  def load_newick_str(str)
+    @tree.newick_str = str
   end
   def to_file
     File.open(@filename, "w+") do |f|
-      #type
-      f.puts String.new('[TYPE] NUCLEOTIDE 1')
-      #model
+      f.puts '[TYPE] NUCLEOTIDE 1'
       f.puts @model.to_s
-      #indelmodel TODO (do a class for Indelmodel?)
-      f.puts "  [indelmodel] POW #{@indelmodel[:param]} #{@indelmodel[:truncate]}"
-      f.puts "  [insertrate] #{@indelmodel[:rate]}"
-      f.puts "  [deleterate] #{@indelmodel[:rate]}"
-      #tree (could be a newick or parameters to simulate tree with a particular shape)
+      f.puts @indelmodel.to_s
       f.puts @tree.to_s
-      #partitions
       f.puts "[PARTITIONS] #{@partitionname}"
       f.puts "  [#{@tree.name} #{@model.label} #{@nbases}]" 
-      #evolve
       f.puts "[EVOLVE]  #{@partitionname} 1 simulatedalignment" 
     end
   end
