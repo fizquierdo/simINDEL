@@ -1,7 +1,4 @@
 #!/usr/bin/env ruby
-# Indelible stuff
-INDELIBLE = "/home/izquiefo/software/indelible/INDELibleV1.03/src/indelible" 
-
 # default values birth-death process
 BDPARAMS = {:birth => 2.4, :death => 1.1, :sample => 0.25, :mut => 0.34} 
 BDKEYS = %w(birth death sample mut)
@@ -62,7 +59,7 @@ class Tree
     @death = BDPARAMS[:death]
     @sample = BDPARAMS[:sample]
     @mut = BDPARAMS[:mut]
-    @seed = 43242342
+    @seed = rand(54245)
   end
   def birth_death_params
     @birth.to_s + " " + @death.to_s + " " + @sample.to_s + " " + @mut.to_s
