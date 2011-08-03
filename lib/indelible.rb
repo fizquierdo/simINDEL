@@ -20,7 +20,9 @@ class Model
   end
   def load_GTR(ct, at , gt , ac , gc, ga)
     @name = "GTR"
+    #indelible order: a b c d e    |  f=1   
     @parameters = {:a => ct,:b => at,:c => gt,:d => ac,:e => gc,:f => ga}
+    @parameters.keys.each{|k| @parameters[k] /= ga.to_f} 
   end
   def to_s
     ret = String.new 
